@@ -1,0 +1,46 @@
+html, body {
+    height: 100%;
+    width: 100%;
+}
+
+.blog-home {
+    height: 100%;
+    width: 100%;
+    position: absolute; top: 30%; 
+}
+
+.blog-content-head {
+    width: 100%;
+    height: 60px;
+    position: fixed;
+    top: 0px;
+    border-bottom: 2px solid gray;
+}
+
+.blog-content-title {
+    font-size: 30px;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%,-50%);
+    border: 0;
+    margin: 0;
+}
+
+.blog-content-body {
+    padding-top: 80px;
+}
+
+.blog-content-body > h2 {
+    width: 100%;
+    text-align: center;
+}
+
+a:link, a:visited {
+    text-decoration: none;
+    text-shadow: 0 0 24px;
+}
+
+ul {
+    list-style-type: none;
+}

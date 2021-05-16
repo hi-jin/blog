@@ -1,0 +1,45 @@
+.root-container {
+    display: none;
+    width: 300px;
+    height: 500px;
+    border: 1px solid gray;
+}
+
+.side-container {
+    display: inline-flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 480px;
+    width: 40px;
+    border-right: 1px solid gray;
+    padding: 10px 0px;
+}
+
+.flex-container {
+    display: flex;
+    flex-direction: column;
+}
+
+.main-container {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    padding: 10px 0px;
+    position: relative;
+}
+
+#friends_list {
+    overflow-y: scroll;
+}
+
+#chat_list {
+    overflow-y: scroll;
+}
+
+.friend_obj {
+    display: block;
+}
+
+.chat_obj {
+    display: block;
+}

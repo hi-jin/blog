@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>hi-jin high-IT</title>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="/css/style.css">
+        <link rel="stylesheet" href="./css/cowtalk.css">
+        <script type='text/javascript' src="https://code.jquery.com/jquery.min.js">
+        </script>
+    </head>
+    <body onload="load_cowtalk();">
+        <div class='blog-content'>
+            <div class='blog-content-head'>
+                <a href='/'><img src='/img/home_icon.png' style='width: 50px; position: absolute; left: 5px; top: 5px;'></a>
+                <p class='blog-content-title'>
+                    Kakao Talk Clone - "Cow Talk"
+                </p>
+            </div>
+            <div align='center' class='blog-content-body'>
+                <img width='300px' height='500px' id="main_img" src="./img/cow_talk_loading.png">
+                <div class="root-container" id="main_menu">
+                    <div class="side-container">
+                        <div class="flex-container">
+                            <a href='javascript:void(0);' onclick='show_list(friends);'><img width="30px" height="30px" src="./img/human_icon.png"></a>
+                            <a href='javascript:void(0);' onclick='show_chat_list();'><img width="30px" height="30px" src="./img/chatting_icon.png"></a>
+                            <a href='javascript:void(0);' onclick='#'><img width="30px" height="30px" src="./img/more_info_icon.png"></a>
+                        </div>
+                        <div class="flex-container">
+                            <a href='javascript:void(0);' onclick='#'><img width="30px" height="30px" src="./img/bell_icon.jpg"></a>
+                        </div>
+                    </div>
+                    <div class="main-container">
+                        <div id='friend_list_view'>
+                            <div style='height: 30px;'>
+                                <span style='position: absolute; left: 10px;'>친구</span>
+                                <span style='position: absolute; right: 10px; top:5px;'><button style='font-size:25px;' onclick='add_friend();'>+</button></span>
+                            </div>
+                            <div style='height: 30px;'>
+                                <input onKeyPress='if (event.keyCode==13) {search_name();}' style='width: 240px;' id='name-search-box' type='text' placeholder='이름 검색'>
+                            </div>
+                            <div style='height: 420px;' id="friends_list">
+
+                            </div>
+                        </div>
+                        <div id='chat_list_view' style='display: none;'>
+                            <div style='height: 30px;'>
+                                <span style='position: absolute; left: 10px;'>채팅</span>
+                            </div>
+                            <div style='height: 30px;'>
+                                <input onKeyPress='if (event.keyCode==13) {search_chat();}' style='width: 240px;' id='chat-search-box' type='text' placeholder='채팅방 이름, 참여자 검색'>
+                            </div>
+                            <div style='height: 420px;' id="chat_list">
+
+                            </div>
+                        </div>
+                        <div id='chat_room_view' style='display: none;'>
+                            <div style='height: 30px;'>
+                                <span style='position: absolute; left: 0px; width: 100%; text-align: center;' id='chat_room_name'></span>
+                            </div>
+                            <div style='height: 420px;' id="chat">
+
+                            </div>
+                            <div style='display: flex; height: 30px; align-items: center;' id="input_chat">
+                                <input id='msg_input' style='position: absolute; left: 10px; width: 70%;' type='text' onKeyPress='if (event.keyCode==13) {send_btn();}'>
+                                <a style='position: absolute; right: 10px;' href='javascript:void(0);' onclick='send_btn();'>전송</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <script>
+            var friends = []
+            var searched_friends = []
+            var friend_count = 0;
+            
+            var chats = []
+            var searched_chats = []
+            var current_room_no = -1;
+            
+            class Friend {
+                constructor(name, unique_num) {
+                    this.name = name;
+                    this.unique_num = unique_num;
+                }
+            }
+            
+            class Chat {
+                constructor(participant) {
+                    this.participant = participant;
+                    this.chat_data = [];
+                    this.unique_num = this.participant.unique_num;
+                }
+            }
+            
+            class Msg {
+                constructor(name, time, msg) {
+                    this.name = name;
+                    this.time = time;
+                    this.msg = msg;
+                }
+            }
+            
+            function send_btn() {
+                var Now = new Date();
+                var NowTime = Now.getFullYear();
+                NowTime += '-' + Now.getMonth() + 1 ;
+                NowTime += '-' + Now.getDate();
+                NowTime += ' ' + Now.getHours();
+                NowTime += ':' + Now.getMinutes();
+                NowTime += ':' + Now.getSeconds();
+                
+                var msg = $('#msg_input').val();
+                
+                send("me", NowTime, msg);
+                
+                setTimeout('ai_send('+current_room_no+')', Math.round(Math.random() * 10000));
+            }
+            
+            function ai_send(unique_num) {
+                var Now = new Date();
+                var NowTime = Now.getFullYear();
+                NowTime += '-' + Now.getMonth() + 1 ;
+                NowTime += '-' + Now.getDate();
+                NowTime += ' ' + Now.getHours();
+                NowTime += ':' + Now.getMinutes();
+                NowTime += ':' + Now.getSeconds();
+                
+                for (var i = 0; i < friends.length; i++) {
+                    if (friends[i].unique_num === unique_num) {
+                        send(friends[i].name, NowTime, "아진짜?");
+                        break;
+                    }
+                }
+            }
+            
+            function send(name, NowTime, msg) {
+                for (var i = 0; i < chats.length; i++) {
+                    if (chats[i].unique_num === current_room_no) {
+                        chats[i].chat_data.push(new Msg(name, NowTime, msg));
+                        $('#msg_input').val('');
+                        break;
+                    }
+                }
+                
+                if (name === "me") {
+                    $('#chat').html($('#chat').html() + "<p style='text-align: right; margin: 0px 5px;'>" + name + " - " + NowTime + "<br>" + msg + "</p>");
+                } else {
+                    $('#chat').html($('#chat').html() + "<p style='text-align: left; margin: 0px 5px;'>" + name + " - " + NowTime + "<br>" + msg + "</p>");
+                }
+            }
+            
+            function start_chat_room(unique_num) {
+                for (var i = 0; i < chats.length; i++) {
+                    if (chats[i].unique_num === unique_num) {
+                        enter_chat_room(unique_num);
+                        return;
+                    }
+                }
+                create_chat_room(unique_num);
+                enter_chat_room(unique_num);
+            }
+            
+            function enter_chat_room(unique_num) {
+                $('#chat').html('');
+                for (var i = 0; i < friends.length; i++) {
+                    if (friends[i].unique_num === unique_num) {
+                        $('#chat_room_name').text(friends[i].name);
+                        break;
+                    }
+                }
+                for (var i = 0; i < chats.length; i++) {
+                    if (chats[i].unique_num === unique_num) {
+                        for (var j = 0 ; j < chats[i].chat_data.length; j++) {
+                            if (chats[i].chat_data[j].name === "me") {
+                                $('#chat').html($('#chat').html() + "<p style='text-align: right; margin: 0px 5px;'>" + chats[i].chat_data[j].name + " - " + chats[i].chat_data[j].time + "<br>" + chats[i].chat_data[j].msg + "</p>");
+                            } else {
+                                $('#chat').html($('#chat').html() + "<p style='text-align: left; margin: 0px 5px;'>" + chats[i].chat_data[j].name + " - " + chats[i].chat_data[j].time + "<br>" + chats[i].chat_data[j].msg + "</p>");
+                            }
+                        }
+                        break;
+                    }
+                }
+                show_chat_room();
+                current_room_no = unique_num;
+            }
+            
+            function create_chat_room(unique_num) {
+                var friend;
+                for (var i = 0; i < friends.length; i++) {
+                    if (friends[i].unique_num === unique_num) {
+                        friend = friends[i]
+                    }
+                }
+                var chat = new Chat(friend);
+                chats.push(chat);
+                
+                var chat_list_div = document.getElementById("chat_list");
+                var new_div = document.createElement("a");
+                new_div.innerText = chat.participant.name;
+                new_div.setAttribute("href", "javascript:void(0);");
+                new_div.setAttribute("class", "chat_obj");
+                new_div.setAttribute("unique_num", chat.unique_num);
+                new_div.setAttribute("onclick", "enter_chat_room(" + chat.unique_num + ")");
+                
+                chat_list_div.appendChild(new_div);
+            }
+            
+            function add_friend() {
+                var friend_name = prompt("추가할 친구 이름을 입력하세요.");
+                if (friend_name === "") {return;}
+                if (friend_name === null) {return;}
+                var new_friend = new Friend(friend_name, friend_count);
+                friend_count += 1;
+                
+                friends.push(new_friend);
+                
+                var friends_list_div = document.getElementById("friends_list");
+                var new_div = document.createElement("a");
+                new_div.innerText = friend_name;
+                new_div.setAttribute("href", "javascript:void(0);");
+                new_div.setAttribute("class", "friend_obj");
+                new_div.setAttribute("unique_num", new_friend.unique_num);
+                new_div.setAttribute("onclick", "start_chat_room(" + new_friend.unique_num + ")");
+                
+                friends_list_div.appendChild(new_div);
+            }
+            
+            function search_name() {
+                searched_friends = []
+                friend_name = document.getElementById('name-search-box').value
+                if (friend_name === "") {
+                    show_list(friends);
+                    return;
+                }
+                if (friend_name === null) {
+                    return;
+                }
+                for (var i = 0; i < friends.length; i++) {
+                    if (friends[i].name.includes(friend_name)) {
+                        searched_friends.push(friends[i]);
+                    }
+                }
+                
+                show_list(searched_friends);
+            }
+            
+            function show_list(list) {
+                show_friend_list();
+                var friend_objs = document.getElementsByClassName("friend_obj");
+                for (var i = friend_objs.length - 1; i >= 0; i--) {
+                    var parent = friend_objs[i].parentElement;
+                    parent.removeChild(friend_objs[i]);
+                }
+                if (list.length === 0) {return;}
+                
+                for (var i = 0; i < list.length; i++) {
+                    var friends_list_div = document.getElementById("friends_list");
+                    var new_div = document.createElement("a");
+                    new_div.innerText = list[i].name;
+                    new_div.setAttribute("href", "javascript:void(0);");
+                    new_div.setAttribute("class", "friend_obj");
+                    new_div.setAttribute("unique_num", list[i].unique_num);
+                    new_div.setAttribute("onclick", "start_chat_room(" + list[i].unique_num + ")");
+
+                    friends_list_div.appendChild(new_div);
+                }
+            }
+            
+            function load_cowtalk() {
+                setTimeout("after_loading();", 2000);
+            }
+            
+            function after_loading() {
+                document.getElementById("main_img").height = "0px";
+                document.getElementById("main_img").width = "0px";
+                display_main_menu();
+            }
+            
+            function display_main_menu() {
+                document.getElementById("main_menu").style.display = "inline-flex";
+            }
+            
+            function show_friend_list() {
+                $('#friend_list_view').css("display", "");
+                $('#chat_list_view').css("display", "none");
+                $('#chat_room_view').css("display", "none");
+            }
+            
+            function show_chat_list() {
+                $('#friend_list_view').css("display", "none");
+                $('#chat_list_view').css("display", "");
+                $('#chat_room_view').css("display", "none");
+            }
+            
+            function show_chat_room() {
+                $('#friend_list_view').css("display", "none");
+                $('#chat_list_view').css("display", "none");
+                $('#chat_room_view').css("display", "");
+            }
+        </script>
+    </body>
+</html>
